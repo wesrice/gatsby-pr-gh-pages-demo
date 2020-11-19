@@ -1,0 +1,28 @@
+name: Static Site
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  static-site:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: GATSBY_PATH_PREFIX=subdir1 npm run build -- --prefix-paths
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          destination_dir: subdir1
