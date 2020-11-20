@@ -1,13 +1,10 @@
-name: Static Site
+name: Pull Request
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
 
 jobs:
-  static-site:
+  build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
 
@@ -23,28 +20,14 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.event.number }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           destination_dir: pr-${{ github.event.number }}
 
       - name: Add Deploy Link to PR
         uses: unsplash/comment-on-pr@master
-        if: ${{ github.event.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: "Preview link: https://wesrice.github.io/${{ github.event.repository.name }}/pr-${{ github.event.number }}"
           check_for_duplicate_msg: true
-
-      - name: Mock dir
-        run: |
-          mkdir null
-
-      - name: Delete preview
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ !github.event.number }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          destination_dir: pr-${{ github.event.number }}
-          publish_dir: ./null
