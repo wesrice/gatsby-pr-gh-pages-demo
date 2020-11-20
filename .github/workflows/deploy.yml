@@ -19,10 +19,32 @@ jobs:
         run: npm install
 
       - name: Build
-        run: GATSBY_PATH_PREFIX=subdir1 npm run build -- --prefix-paths
+        run: GATSBY_PATH_PREFIX="${{ github.event.repository.name }}/pr-${{ github.event.number }}" npm run build -- --prefix-paths
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event.number }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          destination_dir: subdir1
+          destination_dir: pr-${{ github.event.number }}
+
+      - name: Add Deploy Link to PR
+        uses: unsplash/comment-on-pr@master
+        if: ${{ github.event.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "Preview link: https://wesrice.github.io/${{ github.event.repository.name }}/pr-${{ github.event.number }}"
+          check_for_duplicate_msg: true
+
+      - name: Mock dir
+        run: |
+          mkdir null
+
+      - name: Delete preview
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ !github.event.number }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          destination_dir: pr-${{ github.event.number }}
+          publish_dir: ./null
